@@ -273,6 +273,20 @@ public class SignalService {
 		}
 		save();
 	}
+
+	public void sendMessage(String groupId, String content) throws IOException {
+	    byte[] id = Base64.decode(groupId);
+	    Group group = store.getDataStore().getGroup(new GroupId(id));
+        SignalServiceDataMessage message = SignalServiceDataMessage.newBuilder()
+                .withTimestamp(System.currentTimeMillis())
+                .asGroupMessage(SignalServiceGroup.newBuilder(Type.DELIVER)
+                        .withId(group.getId().getId())
+                        .build())
+                .withBody(content)
+                .withExpiration(group.getMessageExpirationTime())
+                .build();
+        sendMessage(group.getMembers(), message);
+    }
 	
 	/**
 	 * Notify other devices that these messages have been read.
